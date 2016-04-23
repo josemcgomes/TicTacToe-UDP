@@ -72,34 +72,38 @@ def list_clients(addr):
 def handle_invite(addr, sender, receiver):
   global lastmsg
   global repeat
-  if sender == receiver:
-    respond_msg = "NOK|Não se pode convidar a si próprio!"
-    server.sendto(respond_msg.encode(), addr)
-  else:
-    if receiver in state:
-      if state[receiver] == "Ocupado":
-        respond_msg = "RCONVIDAR|" + receiver + "|" + sender + "|NA|"
-        print("user ocupado")
-        server.sendto(respond_msg.encode(), addr)
-      
-      elif state[receiver] == "Livre":
-        respond_msg = "CONVIDAR|" + sender + "|" + receiver
-        if lastmsg == respond_msg:
-          repeat += 1
-        else:
-          lastmsg = respond_msg 
-        if repeat == 3:
-          respond_msg = "NOK|Cliente indisponível"
-          server.sendto(respond_msg.encode(), addrs[sender])
-          remove_client(addrs[receiver])
-          repeat = 0
-        else:
-          server.sendto(respond_msg.encode(), addrs[receiver])
-          print(addrs[receiver])
-
-    else:
-      respond_msg = "NOK|Jogador não encontrado"
+  if sender != "":
+    if sender == receiver:
+      respond_msg = "NOK|Não se pode convidar a si próprio!"
       server.sendto(respond_msg.encode(), addr)
+    else:
+      if receiver in state:
+        if state[receiver] == "Ocupado":
+          respond_msg = "RCONVIDAR|" + receiver + "|" + sender + "|NA|"
+          print("user ocupado")
+          server.sendto(respond_msg.encode(), addr)
+        
+        elif state[receiver] == "Livre":
+          respond_msg = "CONVIDAR|" + sender + "|" + receiver
+          if lastmsg == respond_msg:
+            repeat += 1
+          else:
+            lastmsg = respond_msg 
+          if repeat == 3:
+            respond_msg = "NOK|Cliente indisponível"
+            server.sendto(respond_msg.encode(), addrs[sender])
+            remove_client(addrs[receiver])
+            repeat = 0
+          else:
+            server.sendto(respond_msg.encode(), addrs[receiver])
+            print(addrs[receiver])
+
+      else:
+        respond_msg = "NOK|Jogador não encontrado"
+        server.sendto(respond_msg.encode(), addr)
+  else:
+    respond_msg = "NOK|Acesso negado."
+    server.sendto(respond_msg.encode(), addr)
 
 def handle_invite_response(addr, sender, receiver, response):
   respond_msg = "RCONVIDAR|" + sender + "|" + receiver + "|" + response + "|"
